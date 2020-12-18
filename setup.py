@@ -15,8 +15,6 @@ setup(
     description = '接口测试工具',
     author = 'jichaosong',
     author_email = 'jichaosong@outlook.com',
-    url='',
+    url='https://github.com/JiChaoSong/ApiTestTool.git',
     packages = ['autotest'],
-
-
 )
