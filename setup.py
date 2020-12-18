@@ -17,4 +17,10 @@ setup(
     author_email = 'jichaosong@outlook.com',
     url='https://github.com/JiChaoSong/ApiTestTool.git',
     packages = ['autotest'],
+    install_requires = [
+        'loguru==0.5.3',
+        'xlrd==1.2.0',
+        'Faker==4.15.0',
+        'requests==2.25.0',
+    ],
 )
