@@ -86,12 +86,12 @@ def run(filepath):
     }
 
 
-if __name__ == '__main__':
-    filepath = os.getcwd() + r"\case\蒙多奇超级后台接口测试.xlsx"
-
-    reponse = run(filepath)
-    now = time.strftime("%Y-%m-%d-%H-%M-%S")
-    result = ReportUtils(reponse = reponse)
-    result.report(title = "蒙多奇超级后台接口测试", filename = now, report_dir = "report")
-    # 确保index是最新的
-    result.report(title = "蒙多奇超级后台接口测试", filename = "index", report_dir = "report")
+# if __name__ == '__main__':
+#     filepath = os.getcwd() + r"\case\蒙多奇超级后台接口测试.xlsx"
+#
+#     reponse = run(filepath)
+#     now = time.strftime("%Y-%m-%d-%H-%M-%S")
+#     result = ReportUtils(reponse = reponse)
+#     result.report(title = "蒙多奇超级后台接口测试", filename = now, report_dir = "report")
+#     # 确保index是最新的
+#     result.report(title = "蒙多奇超级后台接口测试", filename = "index", report_dir = "report")
