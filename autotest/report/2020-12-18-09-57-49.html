@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <meta name="format-detection" content="telephone=no">
+
+    <title>蒙多奇超级后台接口测试</title>
+    <!-- 引入vue-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <!-- 引入echart组件-->
+    <script src="https://lib.baomitu.com/echarts/4.7.0/echarts.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.0.0/highlight.min.js"></script></head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header>
+            <div class="title">{{title}}</div>
+        </el-header>
+        <div class="maincontent">
+
+            <div class="header">
+                <el-collapse v-model="activeNames">
+                    <el-collapse-item title="报告汇总" name="1">
+                        <el-row :gutter="10">
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <el-table
+                                        :data="resultArray.summary"
+                                        size="small"
+                                        :show-header="status"
+                                        border
+                                        class="tabletile"
+                                >
+                                    <el-table-column property="name" label="" align="center"></el-table-column>
+                                    <el-table-column property="value" label="1" align="center"></el-table-column>
+                                </el-table>
+                            </el-col>
+                            <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                                <div id="main" class="runechart" style="width: 300px; height: 300px"></div>
+                            </el-col>
+                        </el-row>
+                    </el-collapse-item>
+                </el-collapse>
+            </div>
+
+            <div class="content">
+                <el-collapse v-model="activeNames">
+                    <el-collapse-item title="详细数据" name="2">
+                        <el-table :data="resultArray.responseList.slice((currentPage-1)*pagesize,currentPage*pagesize)" size="small" stripe border>
+                            <el-table-column type="index" label="序号" align="center" :index="indexMethod" width="80"></el-table-column>
+                            <el-table-column label="接口名称" align="center" property="apiInfo.apiName" width="150"></el-table-column>
+                            <el-table-column label="请求地址" align="center" property="apiInfo.apiPath"></el-table-column>
+                            <el-table-column label="请求方法" align="center" property="apiInfo.apiMethod" width="100"></el-table-column>
+                            <el-table-column label="请求参数" align="center" property="apiInfo.apiParam"></el-table-column>
+                            <el-table-column label="耗时" align="center" width="100">
+                                <template slot-scope="scope">
+                                    <span v-if="scope.row.costTime !== null">{{scope.row.costTime}}s</span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="状态" align="center" width="80">
+                                <template slot-scope="scope">
+                                    <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column property="response" label="详情" type="expand" width="100">
+                                <template slot-scope="props">
+                                    <span>{{props.row.response}}</span>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                        <el-pagination
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                                :current-page="currentPage"
+                                :page-size="pagesize"
+                                layout="total, prev, pager, next"
+                                :total=resultArray.responseList.length
+                        >
+                        </el-pagination>
+                    </el-collapse-item>
+                </el-collapse>
+            </div>
+        </div>
+    </el-container>
+</div>
+
+<script type="text/javascript">
+    var app = new Vue({
+        el: "#app",
+        filters: {
+            statusFilter(status) {
+                const statusMap = {
+                    "PASS": 'success',
+                    "FAIL": 'warning',
+                    "ERROR": 'danger',
+                    "SKIP": 'info'
+                }
+                return statusMap[status]
+            }
+        },
+        data: {
+            title: '蒙多奇超级后台接口测试',
+            activeNames: ['1','2'],
+            labelPosition: 'right',
+            status: false,
+            // 当前页数
+            currentPage: 1,
+            // 每页数据个数
+            pagesize: 10,
+            resultArray: {
+  "responseList": [
+    {
+      "apiInfo": {
+        "apiName": "用户登陆",
+        "apiPath": "/api-home/admin/auth/login",
+        "apiMethod": "POST",
+        "apiParam": "{'username': 'admin', 'password': '741A627471982D84D67177464D006A01'}",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Length": "56",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "status": "PASS",
+      "response": "{\"status\":\"succ\",\"code\":20000,\"message\":\"请求成功\",\"data\":{\"createTime\":1604394944915,\"updateTime\":1604394944915,\"sequence\":null,\"validation\":null,\"userId\":1,\"name\":null,\"username\":\"admin\",\"phone\":null,\"email\":null,\"status\":1,\"origin\":0,\"token\":\"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOjEsImNyZWF0ZWQiOjE2MDgyNTY2Njg5NTAsImNsaWVudCI6IjEwMCIsInR5cGUiOiIxMDEiLCJleHAiOjE2MDgzNDMwNjh9.Fg1vg_sjDijcCTJTNBnKZ7Vb6QzL6DW4I6kNI10SRS2OTh7_fGyuZL7GyWsPhLYkORarE3vPKBY5Tn1Vhjhvsg\",\"roleIds\":null,\"accessIds\":null,\"id\":1},\"validation\":{\"type\":100,\"MyValidationTypeIntro\":\"隐藏\",\"content\":\"请求成功\"},\"systemTime\":1608256668955}",
+      "errors": null,
+      "costTime": 0.212178
+    },
+    {
+      "apiInfo": {
+        "apiName": "用户登出",
+        "apiPath": "/api-home/admin/auth/logout",
+        "apiMethod": null,
+        "apiParam": "",
+        "apiHeaders": null
+      },
+      "status": "SKIP",
+      "response": null,
+      "errors": null,
+      "costTime": null
+    },
+    {
+      "apiInfo": {
+        "apiName": "用户注册",
+        "apiPath": "/api-home/admin/auth/register",
+        "apiMethod": null,
+        "apiParam": "",
+        "apiHeaders": null
+      },
+      "status": "SKIP",
+      "response": null,
+      "errors": null,
+      "costTime": null
+    },
+    {
+      "apiInfo": {
+        "apiName": "用户详情",
+        "apiPath": "/api-home/admin/auth/info",
+        "apiMethod": "POST",
+        "apiParam": "None",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Length": "0"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669047}\n",
+      "errors": null,
+      "costTime": 0.023786
+    },
+    {
+      "apiInfo": {
+        "apiName": "用户详情",
+        "apiPath": "/api-home/admin/auth/info",
+        "apiMethod": "POST",
+        "apiParam": "None",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Length": "0"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669095}\n",
+      "errors": null,
+      "costTime": 0.041404
+    },
+    {
+      "apiInfo": {
+        "apiName": "社区新增",
+        "apiPath": "/api-home/admin/community/add",
+        "apiMethod": "POST",
+        "apiParam": "{'name': '维涛科技有限公司', 'phone': '15253114017', 'address': '湖北省通辽县白云长沙街F座 157480', 'username': 'luoyan'}",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Length": "236",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669198}\n",
+      "errors": null,
+      "costTime": 0.032086
+    },
+    {
+      "apiInfo": {
+        "apiName": "社区新增",
+        "apiPath": "/api-home/admin/community/add",
+        "apiMethod": "POST",
+        "apiParam": "{'name': '万迅电脑传媒有限公司', 'phone': '15608598607', 'address': '湖南省洁市崇文王路z座 391051', 'username': 'leiding'}",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Length": "237",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669261}\n",
+      "errors": null,
+      "costTime": 0.02612
+    },
+    {
+      "apiInfo": {
+        "apiName": "社区新增",
+        "apiPath": "/api-home/admin/community/add",
+        "apiMethod": "POST",
+        "apiParam": "{'name': '盟新信息有限公司', 'phone': '13077808276', 'address': '福建省马鞍山县闵行祝路Q座 216154', 'username': 'zhuping'}",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Length": "237",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669342}\n",
+      "errors": null,
+      "costTime": 0.023632
+    },
+    {
+      "apiInfo": {
+        "apiName": "社区列表",
+        "apiPath": "/api-home/admin/community/list",
+        "apiMethod": "POST",
+        "apiParam": "{'page': 1, 'size': 10}",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Length": "14",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669418}\n",
+      "errors": null,
+      "costTime": 0.033434
+    },
+    {
+      "apiInfo": {
+        "apiName": "社区详情",
+        "apiPath": "/api-home/admin/community/info",
+        "apiMethod": "POST",
+        "apiParam": "{'communityId': None}",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669505}\n",
+      "errors": null,
+      "costTime": 0.023063
+    },
+    {
+      "apiInfo": {
+        "apiName": "社区编辑",
+        "apiPath": "/api-home/admin/community/edit",
+        "apiMethod": "POST",
+        "apiParam": "{'communityId': None, 'name': '天益传媒有限公司'}",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Length": "77",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669626}\n",
+      "errors": null,
+      "costTime": 0.054772
+    },
+    {
+      "apiInfo": {
+        "apiName": "社区删除",
+        "apiPath": "/api-home/admin/community/delete",
+        "apiMethod": "POST",
+        "apiParam": "{'communityId': None}",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669739}\n",
+      "errors": null,
+      "costTime": 0.046869
+    },
+    {
+      "apiInfo": {
+        "apiName": "量表商品信息列表",
+        "apiPath": "/api-home/admin/commodityInfo/list",
+        "apiMethod": "POST",
+        "apiParam": "{'page': 1, 'size': 10, 'category': 101}",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Length": "27",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669794}\n",
+      "errors": null,
+      "costTime": 0.048161
+    },
+    {
+      "apiInfo": {
+        "apiName": "课程商品信息列表",
+        "apiPath": "/api-home/admin/commodityInfo/list",
+        "apiMethod": "POST",
+        "apiParam": "{'page': 1, 'size': 10, 'category': 102}",
+        "apiHeaders": {
+          "User-Agent": "python-requests/2.25.0",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "Content-Length": "27",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      },
+      "status": "FAIL",
+      "response": "{\"status\":\"fail\",\"code\":40001,\"message\":\"Full authentication is required to access this resource\",\"data\":null,\"validation\":{\"type\":102,\"MyValidationTypeIntro\":\"提示框\",\"content\":\"Full authentication is required to access this resource\"},\"systemTime\":1608256669874}\n",
+      "errors": null,
+      "costTime": 0.026659
+    }
+  ],
+  "testAll": 14,
+  "testPass": 12,
+  "testFail": 0,
+  "testError": 0,
+  "testSkip": 2,
+  "summary": [
+    {
+      "value": 14,
+      "name": "用例总数"
+    },
+    {
+      "value": 12,
+      "name": "用例通过"
+    },
+    {
+      "value": 0,
+      "name": "用例失败"
+    },
+    {
+      "value": 2,
+      "name": "用例跳过"
+    },
+    {
+      "value": "2020-12-18 09:57:48",
+      "name": "开始时间"
+    },
+    {
+      "value": "1.18s",
+      "name": "耗时"
+    }
+  ]
+}
+        },
+        mounted(){
+            this.$nextTick(function() {
+                this.getPie()
+            })
+        },
+        methods: {
+            handleSizeChange(val) {
+                this.pagesize = val;
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+            },
+
+            indexMethod(index) {
+                return (this.currentPage - 1) * this.pagesize + (index + 1)
+            },
+
+            getPie() {
+                // 绘制图表
+                var myChart = echarts.init(document.getElementById('main'))
+                // 指定图表的配置项和数据
+                var option = {
+                    //标题
+                    title: {
+                        text: '测试用例运行统计',
+                        x: 'center' ,              //标题位置
+                    },
+                    stillShowZeroSum: true,
+                    //鼠标划过时饼状图上显示的数据
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a}<br/>{b}:{c} ({d}%)'
+                    },
+                    //图例
+                    legend: {//图例  标注各种颜色代表的模块
+                        // orient: 'vertical',//图例的显示方式  默认横向显示
+                        bottom: 10,//控制图例出现的距离  默认左上角
+                        left: 'center',//控制图例的位置
+                        // itemWidth: 16,//图例颜色块的宽度和高度
+                        // itemHeight: 12,
+                        textStyle: {//图例中文字的样式
+                            color: '#000',
+                            fontSize: 14
+                        },
+                        data: ['成功', '失败', '跳过']//图例上显示的饼图各模块上的名字
+                    },
+                    //饼图中各模块的颜色
+                    color: ['#32dadd', '#b6a2de', '#5ab1ef'],
+                    // 饼图数据
+                    series: {
+                        name: '运行结果',
+                        type: 'pie',             //echarts图的类型   pie代表饼图
+                        radius: '50%',           //饼图中饼状部分的大小所占整个父元素的百分比
+                        center: ['50%', '50%'],  //整个饼图在整个父元素中的位置
+                        // data:''               //饼图数据
+                        data: [                  //每个模块的名字和值
+                            { name: '成功', value: this.resultArray.testPass },
+                            { name: '失败', value: this.resultArray.testFail},
+                            { name: '跳过', value: this.resultArray.testSkip }
+                        ],
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true,//饼图上是否出现标注文字 标注各模块代表什么  默认是true
+                                    // position: 'inner',//控制饼图上标注文字相对于饼图的位置  默认位置在饼图外
+                                },
+                                labelLine: {
+                                    show: true//官网demo里外部标注上的小细线的显示隐藏    默认显示
+                                }
+                            }
+                        },
+                    }
+
+                }
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option)
+            }
+        }
+    })
+</script>
+<style>
+    body {
+        margin: 0;
+        background-color: #F2F6FC;
+    }
+    .el-header {
+        background-color: white;
+        color: #333;
+        text-align: center;
+        line-height: 60px;
+        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    .maincontent {
+        color: #333;
+        margin: auto 10%;
+
+    }
+    .content {
+        padding: 20px 0 0 0 ;
+    }
+
+    .tabletile {
+        margin-left: 20%;
+        width: 60%;
+    }
+    .el-pagination {
+        padding-top: 20px;
+        text-align: right;
+    }
+    .runechart {
+        margin-left: 20%;
+    }
+
+    @media screen and (max-device-width:768px){
+        .el-header {
+            margin-bottom: 10px;
+        }
+        .maincontent {
+            margin: auto 4%;
+        }
+        .content {
+            padding: 10px 0 0 0 ;
+        }
+        .tabletile{
+            margin-left: 0;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .el-pagination {
+            padding-top: 10px;
+        }
+        .runechart {
+            margin-left: 0;
+        }
+    }
+
+    .el-col {
+        border-radius: 4px;
+    }
+    .bg-purple-dark {
+        background: #99a9bf;
+    }
+    .bg-purple {
+        background: #d3dce6;
+    }
+    .bg-purple-light {
+        background: #e5e9f2;
+    }
+    .grid-content {
+        border-radius: 4px;
+        min-height: 36px;
+    }
+
+    .el-collapse-item__header {
+        padding: 0 20px 0 20px ;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .el-collapse-item__header.is-active {
+        border-bottom: 1px solid #e2e3e3;
+    }
+    .el-collapse-item__wrap {
+        padding: 20px 20px 0 20px ;
+    }
+
+</style>
+
+</body>
+</html>
